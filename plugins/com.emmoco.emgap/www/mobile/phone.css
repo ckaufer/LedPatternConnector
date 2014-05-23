@@ -1,0 +1,14 @@
+div#wrapper {
+	overflow: scroll;
+}
+
+div#wrapper div#device {
+	background: url(phone-p.jpg) no-repeat;	
+	height: 637px;
+	padding: 78px 25px;
+	width: 368px;
+}
+
+.my-devlist-item {
+	font-size: 9pt;
+}

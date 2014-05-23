@@ -1,0 +1,201 @@
+.ui-content {
+	padding: 0;
+}
+
+/* Device List */
+
+#device-list-content ul {
+	margin: 0;
+	padding: 0;
+}
+
+.devlist-item {
+	padding: 5px 0px 8px 0px !important;
+}
+
+.devlist-item .item {
+	font-weight: bold;
+	margin-top: 2px;
+	margin-left: 20px;
+}
+
+.devlist-item .deviceName {
+	color: black;
+	font-size: 13pt;
+	margin-bottom: 2px;
+}
+
+.devlist-item .schemaId {
+	color: green;
+	font-size: 8pt;
+	margin-bottom: 5px;
+}
+
+.devlist-item .schemaId-null {
+	color: red;
+	font-size: 8pt;
+	margin-bottom: 5px;
+}
+
+.devlist-item .rssi {
+	color: blue;
+	font-size: 7pt;
+	margin-bottom: 0px;
+}
+
+/* Resource List */
+
+#resource-list-content ul {
+	margin: 0;
+	padding: 0;
+}
+
+.reslist-divider {
+	padding: 7px 15px;
+}
+
+.reslist-item {
+	padding: 0px 0px 3px 12px !important;
+}
+
+.reslist-item .name {
+	font-size: 11pt;
+	font-weight: normal;
+	padding-top: 6px !important;
+	padding-bottom: 5px !important;
+}
+
+.reslist-item .access {
+	margin-left: 15px;
+	margin-bottom: 1px;
+}
+
+.reslist-item .access img {
+	vertical-align: middle;
+}
+
+.reslist-item .ind-count {
+	background: rgb(94, 135, 176);
+	color: white;
+	display: inline;
+	font-size: 9pt;
+	font-weight: normal;
+	margin-left: 15px;
+	padding: 1px 3px;
+	text-align: right;
+	text-shadow: none;
+	vertical-align: middle;
+}
+
+/* Resource Value */
+
+#resource-value-footer-navbar a[data-access="true"] {
+	color: rgb(95,190,226);
+	font-weight: bold;
+}
+
+#resource-value-footer-navbar a[data-access="false"] {
+	color: rgb(100,100,100);
+}
+
+#resource-value-content {
+	background: beige;
+	min-height: 480px;  /* TODO: generalize */
+	padding: 10px 0px;
+}
+
+#resource-value-content div.label {
+	clear: both;
+}
+
+#resource-value-content p.label {
+	font-family: "Source Code Pro";
+	font-size: 9pt;
+	margin: 0;
+	padding: 5px 15px;
+}
+
+#resource-value-content div.cell-row {
+	padding: 0px 10px;
+}
+
+#resource-value-content div.cell-input {
+	float: left;
+	width: 60%;
+}
+
+#resource-value-content input.cell {
+	font-family: "Source Code Pro";
+	font-size: 9pt;
+	padding: 2px 5px;
+}
+
+#resource-value-content .ui-btn-inner {
+	font-family: "Source Code Pro";
+	font-size: 9pt;
+	padding: 4px 10px;
+}
+
+
+#resource-value-content div.cell-type {
+	float: left;
+}
+
+#resource-value-content p.cell {
+	font-family: "Source Code Pro";
+	font-size: 9pt;
+	margin: 0;
+	padding-left: 10px;
+	padding-top: 10px;
+}
+
+input.ui-input-text.ui-slider-input {
+	float: left;
+	font-size: 9pt;
+	padding: 0px;
+	margin-top: 3px;
+	width: 45%
+}
+
+.ui-slider-track {
+	margin: 0 0 0 50%;
+	width: 45%;
+}
+
+em-bi {
+	color: rgb(213,127,170);
+	font-weight: bold;
+}
+
+em-co {
+	color: rgb(63,127,95);
+}
+
+em-kw {
+	color: rgb(134,165,228);
+	font-weight: bold;
+}
+
+#mainBoard {
+	background:black;
+}
+
+.mainBoardLed {
+	border-radius: 50%;
+	position: absolute;
+}
+
+[data-color="blue"] {
+	background: blue;
+}
+
+[data-color="white"] {
+	background: white;
+}
+
+[data-color="off"] {
+	background: gray;
+}
+
+
+

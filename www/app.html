@@ -1,0 +1,55 @@
+    <div id="device-list" data-role="page">
+        <div id="device-list-header" data-role="header">
+            <h1>Devices</h1>
+        </div>
+        <div id="device-list-content" data-role="content">
+            <ul data-role="listview"></ul>
+        </div>
+        
+        <div id="device-list-login-popup" data-role="popup" data-theme="b" class="ui-corner-all">
+            <form>
+                <div style="padding:10px 20px;">
+                    <label for="un" class="ui-hidden-accessible">Api Key:</label>
+                    <input type="text" name="apikey" id="un" value="" placeholder="API token" data-theme="b">
+                    <button type="submit" class="ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check">Sign in</button>
+                </div>
+            </form>
+        </div>
+    
+        <div id="device-list-footer" data-role="footer" data-position="fixed">
+            <div id="device-list-footer-navbar" data-role="navbar">
+                <ul>
+                    <li><a href="#device-list-login-popup" data-rel="popup" data-position-to="window" data-transition="pop">Em-Hub Credentials</a></li>
+                    <li><a id="remove">Remove Schemas</a></li>
+                </ul>
+            </div>
+       </div>
+    </div>
+    
+    <div id="resource-list" data-role="page">
+        <div id="resource-list-header" data-role="header">
+            <a data-icon="arrow-l" data-iconpos="notext" data-theme="b"></a>
+            <h1></h1>
+        </div>
+        <div id="resource-list-content" data-role="content">
+            <ul data-role="listview"></ul>
+        </div>
+    </div>
+    
+    <div id="resource-value" data-role="page">
+        <div id="resource-value-header" data-role="header">
+            <a data-icon="arrow-l" data-iconpos="notext" data-theme="b"></a>
+            <h1></h1>
+        </div>
+        <div id="resource-value-content" data-role="content">
+        </div>
+        <div id="resource-value-footer" data-role="footer" data-position="fixed">
+            <div id="resource-value-footer-navbar" data-role="navbar">
+                <ul>
+                    <li><a id="read">Read</a></li>
+                    <li><a id="writeread">Write/Read</a></li>
+                    <li><a id="write">Write</a></li>
+                </ul>
+            </div>
+       </div>
+    </div>

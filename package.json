@@ -1,0 +1,11 @@
+{
+    "name": "Em-Browser",
+    "main": "plugins/com.emmoco.emgap/www/mobile/phone.html",
+    "window": {
+    	"title": "Em-Browser",
+    	"height": 690,
+    	"width": 430,
+    	"resizable": true,
+    	"toolbar": true
+    }
+}

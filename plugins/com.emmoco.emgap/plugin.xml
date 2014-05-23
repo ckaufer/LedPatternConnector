@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="com.emmoco.emgap"
+    version="1.0.0">
+    <name>Test</name>
+
+	<asset src="www/common" target="common" />
+	<asset src="www/com.emmoco.core" target="com.emmoco.core" />
+	<asset src="www/com.emmoco.web" target="com.emmoco.web" />
+	<asset src="www/mobile-shell.html" target="mobile-shell.html" />
+	
+    <js-module src="www/Mailbox.js" name="Mailbox">
+        <clobbers target="Mailbox" />
+    </js-module>
+
+	<config-file target="AndroidManifest.xml" parent="/manifest">
+    	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    	<uses-permission android:name="android.permission.BLUETOOTH" />
+    	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    	<uses-sdk android:minSdkVersion="18" android:targetSdkVersion="19" />
+	</config-file>
+
+    <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="Mailbox" >
+                <param name="android-package" value="com.emmoco.emgap.Mailbox"/>
+            </feature>
+        </config-file>
+        <source-file src="src/android/Mailbox.java" target-dir="src/com/emmoco/emgap" />
+        <source-file src="libs/framework-core.jar" target-dir="libs" />
+    </platform>
+
+</plugin>
