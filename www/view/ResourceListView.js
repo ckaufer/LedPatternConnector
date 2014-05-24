@@ -5,15 +5,20 @@ define (function (require) {
 	"use strict";
 
 	var INDFMT = "%3d";
-	
+	var connected = false;
 	var App;
-
-	var scene = {"sceneId":0,"led":["OFF","OFF","ON","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF"]}
-	var colors = ["blue","blue","blue","blue","blue","blue","white","white","white","white","white","white","blue"];
-	var x = [200,70,70,200,329,329,243.8,156.3,112.5,156.3,243.8,287.5,200];
-	var y = [50,125,275,350,275,125,124,124,200,275.8,275.8,200,200];
-	var mainBoardWidth = 350;
-	var ledRadius = 30;
+	var DeviceListView;
+	var scene = {"sceneId":0,"led":["OFF","OFF","OFF","ON","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF"]}
+	var colors = [0, 0, 0, "blue","blue","blue","blue","blue","blue","white","white","white","white","white","white","blue"];
+	var x = [0, 0, 0, 200,70,70,200,329,329,243.8,156.3,112.5,156.3,243.8,287.5,200];
+	var y = [0, 0, 0, 50,125,275,350,275,125,124,124,200,275.8,275.8,200,200];
+	
+	var mainBoard = {
+		width: 400,
+		leds: {
+			radius: 15
+		}
+	}
 	
 	function updateCurrentSceneVal(ledNum) {
 		if(scene.led[ledNum] == "ON") {
@@ -33,11 +38,16 @@ define (function (require) {
 	}
 	
 	function updateLedStates() {
-		for(var i = 0; i <= 15; i++) {
-			updateStates(i);
-			console.log("Updating Led " + i);
+		for(var ledNum = 2; ledNum <= 15; ledNum++) {
+			if(scene.led[ledNum] == "ON") {
+				ledOn(ledNum);
+			}
+			else {
+				ledOff(ledNum);
+			}
 		}
 	}
+	
 	function ledOn(ledNum) {
 		$('#mainBoard').find('div[data-ledNum="'+ ledNum + '"]').attr('data-color', colors[ledNum]);
 	}
@@ -47,17 +57,19 @@ define (function (require) {
 	}
 	function changePage(reverse) {
 		$.mobile.changePage($('#resource-list'), {reverse: reverse, transition: 'slide'});
-		updateLedStates();
+		
 	}
 	
 	function display(schName, resTab) {
 		$('#resource-list h1').text(schName);
 		var noAppDiv = true;
 		var noSysDiv = true;
+		
 		var html = "";
-		html += sprintf("<div id='mainBoard' style='width: %dpx; height: %dpx' >", mainBoardWidth, mainBoardWidth);
-		for(var i = 0; i <= 13; i++) {
-			html += sprintf("<div class='mainBoardLed .reslist-item' data-color='%s'  data-resid='currentScene' data-ledNum='%s' style='left: %spx; top: %spx; width: %spx; height: %spx' ></div>", colors[i], i + 2, x[i], y[i], 30, 30);
+		console.log("Entering Resource Display");
+		html += sprintf("<div id='mainBoard' style='width: %dpx; height: %dpx' >", mainBoard.width, mainBoard.width);
+		for(var i = 2; i <= 15; i++) {
+			html += sprintf("<div class='mainBoardLed .reslist-item' data-color='%s'  data-resid='currentScene' data-ledNum='%s' style='left: %spx; top: %spx; width: %spx; height: %spx' ></div>", colors[i], i, x[i] - mainBoard.leds.radius, y[i] - mainBoard.leds.radius, mainBoard.leds.radius * 2, mainBoard.leds.radius * 2);
 		}
 		html += sprintf("</div>");
 		/*resTab.forEach(function (res) {
@@ -83,27 +95,42 @@ define (function (require) {
 		
 		var $ul = $('#resource-list-content ul');
 		$ul.html(html);
-		$ul.listview('refresh');
+		//$ul.listview('refresh');
+		
+		$('#mainBoard').css({"-webkit-transform" : "scale(.7, .7) translate(-60px, -60px)", });
+		updateLedStates();
+		if(connected == true) 
+			App.doEditBegin("currentScene", scene);
+		
 		$('.reslist-item').click(function (eobj) {
 			App.doEditBegin(eobj.currentTarget.dataset['resid']);
 		});
 		
 		$('.mainBoardLed').click(function (eobj) {
-			console.log($(this).attr('data-color'));
 			updateStates($(this).attr('data-ledNum'));
 			updateCurrentSceneVal($(this).attr('data-ledNum'));
 			console.log(scene);
-			App.doEditBegin("currentScene", scene);
-			
+			if(connected == true) 
+				App.doEditBegin("currentScene", scene);
 		});
-		updateLedStates();
+		
+		console.log("finished display");
+		
 	}
 	
-	function init(appMod) {
+	function init(appMod, dList) {
 		App = appMod;
+		DeviceListView = dList;
 		$('#resource-list a').click(function (eobj) {
-			App.doClose();
+			//App.doClose();
+			DeviceListView.changePage(true);
+			App.doScan();
+			
+			console.log("clicked");
+			connected = true;
 		});
+		
+		
 		
 	}
 	
