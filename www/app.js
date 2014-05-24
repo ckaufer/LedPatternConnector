@@ -23,6 +23,7 @@ define (function (require) {
 	var sScanning = false;
 	var sStarting = true;
 	var sTimeout = null;
+	var connecting = false;
 	
 	function apiKey(key) {
 		if (key != undefined) sApiKey = localStorage.apiKey = key;
@@ -81,6 +82,7 @@ define (function (require) {
 	}
 	
 	function doScan() {
+		
 		if (sRemoving) return;
  		console.log('scanning...');
  		sScanning = true;
@@ -146,13 +148,17 @@ define (function (require) {
 		sApiKey = localStorage.apiKey;
 		Cache.loadAllSchemas(function () {
 			Em.ConnectionMgr.onDisconnect(onDisconnect);
+			ResourceListView.init(App, DeviceListView);
 			DeviceListView.init(App);
-			ResourceListView.init(App);
 			ResourceValueView.init(App);
+			
 			Em.start(function () {
 				console.log('starting...');
 			});
 		});
+		
+		ResourceListView.changePage();
+		ResourceListView.display("Hello", "Yo");
 	}
 
 	function leavesToVal(rval, leaves) {
@@ -182,8 +188,8 @@ define (function (require) {
 		Em.ConnectionMgr.onIndicator(null);
 		console.log(sStarting ? 'ready' : 'onDisconnect');
 		sStarting = false;
-		DeviceListView.changePage(true);
-		doScan();
+		ResourceListView.changePage(true);
+		//doScan();
 	}
 	
 	function onIndicator(name, value) {
@@ -221,5 +227,6 @@ define (function (require) {
 	App.doScan = doScan;
 	App.doWrite = doWrite;
 	App.init = init;
+	App.Em = Em;
 	return App;
 });
