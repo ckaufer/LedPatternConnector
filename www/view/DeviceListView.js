@@ -20,12 +20,9 @@ define (function (require) {
 	
 	function display(devList) {
 		var html = "";
-		
-		
-		
 		devList.forEach(function (desc) {
 			html += sprintf("<li class='devlist-item' data-devid='%s'>", desc.deviceId);
-			html += sprintf("<p class='item deviceName'>%s</p>");
+			html += sprintf("<p class='item deviceName'>%s</p>", desc.deviceName);
 			if (desc.schemaName) {
 				html += sprintf("<p class='item schemaId'>%s - %s</p>", desc.schemaName, desc.schemaHash);
 			}
