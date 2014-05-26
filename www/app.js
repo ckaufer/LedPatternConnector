@@ -31,7 +31,7 @@ define (function (require) {
 	}
 	
 	function doEditBegin(resid, rVal) {
-		sResVal = sResTab[resid];
+		sResVal = resid;
 		val = rVal;
 		//ResourceValueView.changePage();
 		//ResourceValueView.display(sResVal);
@@ -60,16 +60,20 @@ define (function (require) {
 		Em.ConnectionMgr.openDevice(desc, function(err) {
 			console.log("done");
 			sResTab = Em.getResources(desc.schemaHash);
+			ResourceListView.setConnected(true);
 			ResourceListView.changePage();
 			ResourceListView.display(desc.schemaName, sResTab);
+			
 			Em.ConnectionMgr.onIndicator(onIndicator);
 		});
 	}
 	
-	function doRead() {
-		Em.ConnectionMgr.readResource(sResVal.name, function (err, val) {
-			ResourceValueView.storeLeaves(valToLeaves(sResVal, val));
-			ResourceValueView.refresh(false);
+	function doRead(rVal) {
+		Em.ConnectionMgr.readResource(rVal, function (err, val) {
+			/*ResourceValueView.storeLeaves(valToLeaves(sResVal, val));
+			ResourceValueView.refresh(false);*/
+			console.log(val);
+			
 		});
 	}
 	
@@ -82,7 +86,6 @@ define (function (require) {
 	}
 	
 	function doScan() {
-		
 		if (sRemoving) return;
  		console.log('scanning...');
  		sScanning = true;
@@ -93,6 +96,7 @@ define (function (require) {
 				doOpen(sDev);
 				return;
 			}
+			console.log(devList[0]);
 			DeviceListView.display(devList);
 			devList.forEach(function (desc) {
 				!desc.schemaId && fetchSchema(desc.schemaHash);
@@ -105,7 +109,7 @@ define (function (require) {
 		console.log(sResVal);
 		console.log(val);
 		//var val = leavesToVal(sResVal, ResourceValueView.fetchLeaves());
-		Em.ConnectionMgr.writeResource("currentScene", val, function(e) {
+		Em.ConnectionMgr.writeResource(sResVal, val, function(e) {
 			if (readFlag) {
 				doRead();
 			}
@@ -158,7 +162,8 @@ define (function (require) {
 		});
 		
 		ResourceListView.changePage();
-		ResourceListView.display("Hello", "Yo");
+		ResourceListView.display("Led Pattern Designer", "Yo");
+		console.log();
 	}
 
 	function leavesToVal(rval, leaves) {
@@ -188,7 +193,9 @@ define (function (require) {
 		Em.ConnectionMgr.onIndicator(null);
 		console.log(sStarting ? 'ready' : 'onDisconnect');
 		sStarting = false;
+		ResourceListView.setConnected(false);
 		ResourceListView.changePage(true);
+		ResourceListView.display();
 		//doScan();
 	}
 	
