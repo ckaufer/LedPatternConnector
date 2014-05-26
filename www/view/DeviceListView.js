@@ -20,18 +20,26 @@ define (function (require) {
 	
 	function display(devList) {
 		var html = "";
-		devList.forEach(function (desc) {
-			html += sprintf("<li class='devlist-item' data-devid='%s'>", desc.deviceId);
-			html += sprintf("<p class='item deviceName'>%s</p>", desc.deviceName);
-			if (desc.schemaName) {
-				html += sprintf("<p class='item schemaId'>%s - %s</p>", desc.schemaName, desc.schemaHash);
-			}
-			else {
-				html += sprintf("<p class='item schemaId-null'>&lt;Unknown&gt; - %s</p>", desc.schemaHash);
-			}
-			html += sprintf("<p class='item rssi'>RSSI: %s</p>", desc.rssi);
-			html += "</li>";
-		});
+		if(!devList[0]) {
+			console.log("N");
+			html += sprintf("<p class='message'>%s</p>", "Looking for nearby devices..");
+		} else {
+			devList.forEach(function (desc) {
+				html += sprintf("<li class='devlist-item' data-devid='%s'>", desc.deviceId);
+				html += sprintf("<p class='item deviceName'>%s</p>", desc.deviceName);
+				if (desc.schemaName) {
+					html += sprintf("<p class='item schemaId'>%s - %s</p>", desc.schemaName, desc.schemaHash);
+				}
+				else {
+					html += sprintf("<p class='item schemaId-null'>&lt;Unknown&gt; - %s</p>", desc.schemaHash);
+				}
+				html += sprintf("<p class='item rssi'>RSSI: %s</p>", desc.rssi);
+				html += "</li>";
+			
+			});
+		}
+	
+		
 		
 		var $ul = $('#device-list-content ul');
 		$ul.html(html);
