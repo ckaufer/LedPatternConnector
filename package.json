@@ -3,8 +3,8 @@
     "main": "plugins/com.emmoco.emgap/www/mobile/phone.html",
     "window": {
     	"title": "Em-Browser",
-    	"height": 690,
-    	"width": 430,
+    	"height": 700,
+    	"width": 500,
     	"resizable": true,
     	"toolbar": true
     }
