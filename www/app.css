@@ -176,15 +176,18 @@ em-kw {
 	font-weight: bold;
 }
 
-#mainBoard {
+.board {
 	background:black;
 }
 
-.mainBoardLed {
+.boardLed {
 	border-radius: 50%;
 	position: absolute;
 }
 
+.message {
+	margin-top: 10px;
+}
 [data-color="blue"] {
 	background: blue;
 }
@@ -193,9 +196,31 @@ em-kw {
 	background: white;
 }
 
+[data-color="red"] {
+	background: red;
+}
+
+[data-color="green"] {
+	background: green;
+}
+
+[data-color="orange"] {
+	background: orange;
+}
+
+[data-color="yellow"] {
+	background: yellow;
+}
+
 [data-color="off"] {
 	background: gray;
 }
 
+#close {
+	width:200px;
+	height:200px;
+	background:red;
+	
+}
 
 
