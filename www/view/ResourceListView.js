@@ -12,18 +12,23 @@ define (function (require) {
 	var BUTTON = 'ui-btn';
 	var mode = "EDIT";
 	
-	var MAX_SCENES = 10;
+	var MAX_SCENES = 15;
 	var MAX_SEQUENCES = 3;
 	var scenes = [];
 	var sequences = [];
 	var currentSceneId = 0;
 	var currentSequenceId = 0;
+	var curTime = 0;
+	var delayVal = .5;
+	//var mainLoop = setInterval(function(){tickHandler()}, 10);
 	for(var i = 0; i <= MAX_SEQUENCES; i++) {
-		sequences[i] = {"sequenceId":i,"maxRange":10,"minRange":0,"seqLength":0,"sceneList":[0,1,2,3,4,5,6,7,8,9]}
+		sequences[i] = {"sequenceId":i,"maxRange":10,"minRange":0,"seqLength":0, "sceneList":[]}
+		
 	}
 	
 	for(var i = 0; i <= MAX_SCENES; i++) {
 		scenes[i] = {"sceneId":i,"led":["OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF"]}
+		sequences[currentSequenceId].sceneList[i] = i;
 	}
 	
 	
@@ -92,6 +97,7 @@ define (function (require) {
 	
 	function sendCurrentScene() {
 		App.doEditBegin("currentScene", scenes[currentSceneId]);
+		
 	}
 	
 	function increaseTemp(num) {
@@ -111,13 +117,33 @@ define (function (require) {
 			return;
 		} else {
 			console.log("just right");
-			currentSceneId = sceneNum;
+			currentSceneId = sequences[currentSequenceId].sceneList[sceneNum];
 			if(connected) {
 				App.doEditBegin("currentSceneId", currentSceneId);
 				//App.doEditBegin("currentSceneId", currentSceneId);
+
 			}
 			updateLedStates();
 			
+		}
+	}
+	
+	function changeDelay(val) {
+		delayVal = val;
+		if(connected) {
+			App.doEditBegin("delay", val);
+			//App.doEditBegin("currentSceneId", currentSceneId);
+			console.log(val);
+		}
+		updateLedStates();
+			
+		
+	}
+	
+	function sendSequence() {
+		if(connected) {
+			App.doEditBegin("currentSequence", sequences[currentSequenceId]);
+			console.log(sequences[currentSequenceId]);
 		}
 	}
 	
@@ -144,13 +170,11 @@ define (function (require) {
 		mode = val;
 		if(connected) {
 			App.doEditBegin("currentMode", mode);
-			App.doEditBegin("currentSequence", sequences[currentSequenceId]);
 			console.log(mode);
-			console.log(sequences[currentSequenceId]);
 		}
 	}
 	
-	
+
 	function display(schName, resTab) {
 		$('#resource-list h1').text(schName);
 		var noAppDiv = true;
@@ -176,9 +200,11 @@ define (function (require) {
 		}
 		html += sprintf("</ul></div>");*/
 		
-		html += sprintf('<input data-type="range" id="points" value="0" min="0" max="10">');
+		html += sprintf('<input data-type="range" id="points" value="0" min="0" max="%s">', MAX_SCENES);
+		html += sprintf('<input data-type="range" id="delay" value="0" min=".05" max="1.0" step=".05" >');
 		html += sprintf("<a class='%sonnect button' >%sonnect</a>", connected ? "Disc" : "C", connected ? "Disc" : "C");
-		html += sprintf("<a class='%s button' >%s</a>", mode == "PLAY" ? "EDIT" : "PLAY", mode == "PLAY" ? "EDIT" : "PLAY");
+		html += sprintf("<a class='%s button' >%s</a>", "PLAY", "PLAY");
+		html += sprintf("<a class='%s button' >%s</a>", "EDIT", "EDIT");
 		/*resTab.forEach(function (res) {
 			if (noAppDiv) {
 				html += sprintf("<li class='reslist-divider' data-role='list-divider'>Application Resources</li>");
@@ -217,7 +243,7 @@ define (function (require) {
 		$ul.find('input').textinput({mini: true, theme: 'b'});
 		$ul.find('.button').button({mini: true, theme: 'b'});
 		
-		$('.mainBoardLed').mouseenter(function (eobj) {
+		$('.mainBoardLed').click(function (eobj) {
 			updateStates($(this).attr('data-ledNum'));
 			updateCurrentSceneVal($(this).attr('data-ledNum'));
 			console.log(scenes[currentSceneId]);
@@ -227,6 +253,12 @@ define (function (require) {
 		
 		$("#points").on('slidestop', function() {
 			changeSceneId($(this).val());
+			//sendSequence();
+		});
+		
+		$("#delay").on('slidestop', function() {
+			changeDelay($(this).val());
+			//sendSequence();
 		});
 		
 		$(".Disconnect").click(function(e) {
@@ -243,11 +275,11 @@ define (function (require) {
 			console.log("clicked");
 		});
 		
-		$(".Play").click(function() {
+		$(".PLAY").click(function() {
 			setMode("PLAY");
 		});
 		
-		$(".Edit").click(function() {
+		$(".EDIT").click(function() {
 			setMode("EDIT");
 		});
 		console.log("finished display");
@@ -281,5 +313,6 @@ define (function (require) {
 	ResourceListView.setConnected = setConnected;
 	ResourceListView.changeSceneId = changeSceneId;
 	ResourceListView.recieveRes = recieveRes;
+	ResourceListView.sendSequence = sendSequence;
 	return ResourceListView;
 });
