@@ -235,5 +235,6 @@ define (function (require) {
 	App.doWrite = doWrite;
 	App.init = init;
 	App.Em = Em;
+	App.sendSequence = ResourceListView.sendSequence;
 	return App;
 });
