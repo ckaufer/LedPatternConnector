@@ -30,12 +30,15 @@ define (function (require) {
 		return sApiKey;
 	}
 	
-	function doEditBegin(resid, rVal) {
+	function doEditBegin(resid, rVal, wFlag) {
 		sResVal = resid;
 		val = rVal;
 		//ResourceValueView.changePage();
 		//ResourceValueView.display(sResVal);
-		doWrite(false);
+		if(wFlag)
+			doWrite(wFlag);
+		else
+			doWrite(false);
 	}
 	
 	function doEditEnd() {
@@ -68,13 +71,76 @@ define (function (require) {
 		});
 	}
 	
+	function doWriteThenFunction(Res, Val, Func) {
+		Em.ConnectionMgr.writeResource(Res, Val, function(e) {
+				Func();
+			});
+	}
+	function doManyWrites(customFunc, finishFunc, ResourceName, startValue, endValue, readResource) {
+		var times = startValue;
+		
+		function m(mode) {
+			Em.ConnectionMgr.writeResource("currentMode", mode, function(e) {
+				console.log("Writing to " + ResourceName + " This many: " + times + " times");
+				w();
+				
+			});
+		}
+		
+		function w() {
+			Em.ConnectionMgr.writeResource(ResourceName, times, function(e) {
+				console.log("Writing to " + ResourceName + " This many: " + times + " times");
+				if(times <= endValue) {
+					ResourceListView.setSending(true);
+					customFunc(times);
+					times++;
+					if(readResource) 
+						r(readResource);
+				} else {
+					ResourceListView.setSending(false);
+					finishFunc();
+					customFunc(1);
+				}
+				
+			});
+		}
+		 
+		function r(rVal) {
+			Em.ConnectionMgr.readResource(rVal, function (err, val) {
+				console.log("Reading From "+rVal+" with a value of ");
+				console.log(val);
+				ResourceListView.storeValue(rVal, val);
+				w();
+			});
+		}
+		m("EDIT");
+	}
+	
+	function doTwoWrites(firstResource, firstVal, secondResource, secondVal) {
+		Em.ConnectionMgr.writeResource(firstResource, firstVal, function(e) {
+			console.log("First Resource Value is ");
+			console.log(firstVal);
+			doSecondWrite(secondResource, secondVal);
+		});
+	}
+	
+	function doSecondWrite(res, val) {
+		Em.ConnectionMgr.writeResource(res, val, function(e) {
+			console.log("Second Resource Value is ");
+			console.log(val);
+		});
+	}
+	
 	function doRead(rVal) {
+		var t;
 		Em.ConnectionMgr.readResource(rVal, function (err, val) {
 			/*ResourceValueView.storeLeaves(valToLeaves(sResVal, val));
 			ResourceValueView.refresh(false);*/
 			console.log(val);
+			ResourceListView.storeValue(rVal, val);
 			
 		});
+		
 	}
 	
 	function doRemoveSchemas() {
@@ -111,10 +177,10 @@ define (function (require) {
 		//var val = leavesToVal(sResVal, ResourceValueView.fetchLeaves());
 		Em.ConnectionMgr.writeResource(sResVal, val, function(e) {
 			if (readFlag) {
-				doRead();
+				doRead(readFlag);
 			}
 			else {
-				ResourceValueView.refresh(true);
+				//ResourceValueView.refresh(true);
 			}
 		});
 	}
@@ -152,13 +218,14 @@ define (function (require) {
 		sApiKey = localStorage.apiKey;
 		Cache.loadAllSchemas(function () {
 			Em.ConnectionMgr.onDisconnect(onDisconnect);
-			ResourceListView.init(App, DeviceListView);
-			DeviceListView.init(App);
-			ResourceValueView.init(App);
+
 			
 			Em.start(function () {
 				console.log('starting...');
 			});
+			ResourceListView.init(App, DeviceListView);
+			DeviceListView.init(App);
+			ResourceValueView.init(App);
 		});
 		
 		ResourceListView.changePage();
@@ -235,6 +302,10 @@ define (function (require) {
 	App.doWrite = doWrite;
 	App.init = init;
 	App.Em = Em;
-	App.sendSequence = ResourceListView.sendSequence;
+	App.sendScene = ResourceListView.sendScene;
+	App.doTwoWrites = doTwoWrites;
+	App.doManyWrites = doManyWrites;
+	App.Res = ResourceListView;
+	App.doWriteThenFunction  = doWriteThenFunction;
 	return App;
 });
