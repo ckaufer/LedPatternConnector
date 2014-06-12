@@ -12,23 +12,22 @@ define (function (require) {
 	var BUTTON = 'ui-btn';
 	var mode = "EDIT";
 	
-	var MAX_SCENES = 15;
-	var MAX_SEQUENCES = 3;
+	var MAX_FRAMES = 14;
+	var MAX_SCENES = 4;
+	var frames = [];
 	var scenes = [];
-	var sequences = [];
-	var currentSceneId = 0;
-	var currentSequenceId = 0;
+	var currentFrameId = 1;
+	var currentSceneId = 1;
 	var curTime = 0;
 	var delayVal = .5;
+	var sending = false;
 	//var mainLoop = setInterval(function(){tickHandler()}, 10);
-	for(var i = 0; i <= MAX_SEQUENCES; i++) {
-		sequences[i] = {"sequenceId":i,"maxRange":10,"minRange":0,"seqLength":0, "sceneList":[]}
-		
+	for(var i = 1; i <= MAX_SCENES; i++) {
+		scenes[i] = {"sceneId":i,"maxRange":1,"minRange":1,"seqLength":1,"delay":1.2}
 	}
 	
-	for(var i = 0; i <= MAX_SCENES; i++) {
-		scenes[i] = {"sceneId":i,"led":["OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF"]}
-		sequences[currentSequenceId].sceneList[i] = i;
+	for(var i = 1; i < MAX_FRAMES; i++) {
+		frames[i] = {"frameId":i,"led":["OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF","OFF"]}
 	}
 	
 	
@@ -38,14 +37,9 @@ define (function (require) {
 	}
 	var liveStream = true;
 	//var colors = [0, 0, 0, "blue","blue","blue","blue","blue","blue","white","white","white","white","white","white","blue"];
-	var colors = [0, 0, "red","green","red","green","red","green","red","orange","orange","orange","blue","blue","yellow","yellow"];
-	var x = [0,0,
-	80,80,80,80,80,80,80,
-	5,  5, 5, 5, 5, 5, 5];
-	
-	var y = [0,0,
-	165,140,115,90,65,35,10,
-	165,140,115,90,65,35, 7];
+	var colors = [0, 0, 0, "blue","blue","blue","blue","blue","blue","white","white","white","white","white","white","blue"];
+	var x = [0, 0, 0, 200,70,70,200,329,329,243.8,156.3,112.5,156.3,243.8,287.5,200];
+	var y = [0, 0, 0, 50,125,275,350,275,125,124,124,200,275.8,275.8,200,200];
 	//var x = [0, 0, 0, 200,70,70,200,329,329,243.8,156.3,112.5,156.3,243.8,287.5,200];
 	//var y = [0, 0, 0, 50,125,275,350,275,125,124,124,200,275.8,275.8,200,200];
 	
@@ -62,20 +56,20 @@ define (function (require) {
 		
 	}
 	console.log(timeline);
-	var scaleFactor = 2;
-	var translateFactorX = -mainBoard.ledsRadius + 120;
-	var translateFactorY = -mainBoard.ledsRadius + 20;
+	var scaleFactor = 1;
+	var translateFactorX = -mainBoard.ledsRadius;
+	var translateFactorY = -mainBoard.ledsRadius;
 	
-	function updateCurrentSceneVal(ledNum) {
-		if(scenes[currentSceneId].led[ledNum] == "ON") {
-		    scenes[currentSceneId].led[ledNum] = "OFF";
+	function updateCurrentFrameVal(ledNum) {
+		if(frames[currentFrameId].led[ledNum] == "ON") {
+		    frames[currentFrameId].led[ledNum] = "OFF";
 		}
 		else {
-		    scenes[currentSceneId].led[ledNum] = "ON";
+		    frames[currentFrameId].led[ledNum] = "ON";
 		}
 	}
 	function updateStates(ledNum) {
-	    if(scenes[currentSceneId].led[ledNum] == "ON") {
+	    if(frames[currentFrameId].led[ledNum] == "ON") {
 			ledOff(ledNum);
 		}
 		else {
@@ -85,7 +79,7 @@ define (function (require) {
 	
 	function updateLedStates() {
 		for(var ledNum = 2; ledNum <= 15; ledNum++) {
-			if(scenes[currentSceneId].led[ledNum] == "ON") {
+			if(frames[currentFrameId].led[ledNum] == "ON") {
 				ledOn(ledNum);
 			}
 			else {
@@ -95,13 +89,23 @@ define (function (require) {
 		
 	}
 	
-	function sendCurrentScene() {
-		App.doEditBegin("currentScene", scenes[currentSceneId]);
+	function sendCurrentFrame() {
+		App.doEditBegin("currentFrame", frames[currentFrameId]);
 		
 	}
 	
+	function setSending(val) {
+		sending = val;
+		if(val == false) {
+			$("#loading").html("Loaded.");
+			setTimeout(function(){$("#loading").html(""); changeFrameAndSceneId(1)}, 700);
+		} else {
+			$("#loading").html("Loading Frames and Scenes...");
+		}
+	}
+	
 	function increaseTemp(num) {
-		if(num == currentSceneId) {
+		if(num == currentFrameId) {
 			tempVal.id = num;
 			tempVal.count++;
 		} else {
@@ -110,29 +114,59 @@ define (function (require) {
 		}
 	}
 	
-	function changeSceneId(sceneNum) {
-		increaseTemp(sceneNum);
-		if(tempVal.count > 1) {
-			console.log("too big");
-			return;
-		} else {
-			console.log("just right");
-			currentSceneId = sequences[currentSequenceId].sceneList[sceneNum];
-			if(connected) {
-				App.doEditBegin("currentSceneId", currentSceneId);
-				//App.doEditBegin("currentSceneId", currentSceneId);
+	function addFrameToCurrentScene() {
+		//if(scenes[currentSceneId].maxRange < SceneFrameMax) {
+			scenes[currentSceneId].maxRange += 1;
 
-			}
-			updateLedStates();
-			
+			var m = parseInt($("#points").attr("max"));
+			$("#points").attr("max", (m + 1).toString());
+			//$("#points").slider("refresh");
+			$("#points").val((m + 1)).slider("refresh");
+			changeFrameId($("#points").val());
+		//}
+	}
+	
+	function setCurrentFrameId(v) {
+		currentFrameId = v;
+	}
+	
+	function setCurrentSceneId(v) {
+		currentSceneId = v;
+		console.log("Current Scene Id is" + currentSceneId);
+		$("#points").attr("max", scenes[currentSceneId].maxRange);
+			//$("#points").slider("refresh");
+		$("#points").slider("refresh");
+	}
+	
+	function changeFrameId(frameNum) {
+		currentFrameId = frameNum;//scenes[currentSceneId].seqLength;
+		if(connected) {
+			App.doEditBegin("currentFrameId", currentFrameId);
+			//App.doEditBegin("currentFrameId", currentFrameId);
+
 		}
+		updateLedStates();
+	
+	}
+	
+	function changeFrameAndSceneId(frameNum) {
+		currentSceneId = frameNum;//scenes[currentSceneId].seqLength;
+		currentFrameId = frameNum;//scenes[currentSceneId].seqLength;
+		if(connected) {
+			App.doTwoWrites("currentSceneId", currentSceneId, "currentFrameId", currentFrameId);
+			//App.doEditBegin("currentFrameId", currentFrameId);
+
+		}
+		updateLedStates();
+	
 	}
 	
 	function changeDelay(val) {
 		delayVal = val;
 		if(connected) {
-			App.doEditBegin("delay", val);
-			//App.doEditBegin("currentSceneId", currentSceneId);
+			scenes[currentSceneId].delay = val;
+			App.doEditBegin("currentScene", scenes[currentSceneId]);
+			//App.doEditBegin("currentFrameId", currentFrameId);
 			console.log(val);
 		}
 		updateLedStates();
@@ -140,17 +174,55 @@ define (function (require) {
 		
 	}
 	
-	function sendSequence() {
+	function sendScene() {
 		if(connected) {
-			App.doEditBegin("currentSequence", sequences[currentSequenceId]);
-			console.log(sequences[currentSequenceId]);
+			App.doEditBegin("currentScene", scenes[currentSceneId]);
+			console.log(scenes[currentSceneId]);
 		}
 	}
 	
+	function saveScene() {
+		if(connected) {
+			App.doEditBegin("saveToEEProm", "SAVE");
+		}
+	}
+	
+	function loadFrames() {
+		/*currentFrameId = i;
+		App.doEditBegin("currentFrameId", i, "currentFrame");
+		changeFrameId(1);*/
+		App.doWriteThenFunction("currentMode", "LOAD", function() {
+			App.doManyWrites(ResourceListView.setCurrentFrameId, (function(){
+				App.doManyWrites(ResourceListView.setCurrentSceneId, (function(){}), "currentSceneId", 1, MAX_SCENES - 1, "currentScene");
+			}), "currentFrameId", 1, MAX_FRAMES, "currentFrame");
+		});
+		
+		
+		
+		
+	}
+	
+	function storeValue(name, val) {
+		if(name == "currentFrame") {
+			frames[currentFrameId] = val;
+			console.log("Name is: " + name + " " + currentFrameId);
+			console.log("Current Frame is");
+			console.log(frames[currentFrameId]);
+			updateLedStates();
+		}
+		
+		if(name == "currentScene") {
+			scenes[currentSceneId] = val;
+			console.log("current Scene is: ");
+			console.log(scenes[currentSceneId]);
+		}
+		
+		
+	}
 	function recieveRes(rName, rVal) {
-		if(rName == "currentScene") {
-			scenes[currentSceneId] = rVal;
-			console.log("Current Scene should be "+scenes[currentSceneId]+" taken from "+rVal);
+		if(rName == "currentFrame") {
+			frames[currentFrameId] = rVal;
+			console.log("Current frame should be "+frames[currentFrameId]+" taken from "+rVal);
 		}
 		
 	}
@@ -174,37 +246,59 @@ define (function (require) {
 		}
 	}
 	
-
+	
+	function updateTimeline(redrawFlag) {
+		for(var i = 0; i < scenes[currentSceneId].maxRange; i++) {
+			//$("#timeline").find("ul").append(sprintf('<li><div class="tBoard" data-frameNum="%s" style="width: %spx; height: %spx; left: %spx; top: %spx;" ></div></li>', scenes[currentSceneId].frameList[i], 25, 25, 30 * i, 0));
+			console.log(i);
+		}
+		
+	}
+	
+	
 	function display(schName, resTab) {
 		$('#resource-list h1').text(schName);
 		var noAppDiv = true;
 		var noSysDiv = true;
 		
+		if(connected) {
+			loadFrames();
+		}
+		
 		var html = "";
 		console.log("Entering Resource Display");
 		html += sprintf("<div id='mainBoard' class='board' style='width: %dpx; height: %dpx' >", mainBoard.width, mainBoard.width);
 		for(var i = 2; i <= 15; i++) {
-			html += sprintf("<div class='boardLed mainBoardLed' data-color='%s'  data-resid='currentScene' data-ledNum='%s' style='left: %spx; top: %spx; width: %spx; height: %spx' ></div>", colors[i], i, x[i] * scaleFactor + translateFactorX, y[i] * scaleFactor + translateFactorY, mainBoard.ledsRadius  * 2, mainBoard.ledsRadius * 2, mainBoard.ledsRadius, mainBoard.ledsRadius);
+			html += sprintf("<div class='boardLed mainBoardLed' data-color='%s'  data-resid='currentFrame' data-ledNum='%s' style='left: %spx; top: %spx; width: %spx; height: %spx' ></div>", colors[i], i, x[i] * scaleFactor + translateFactorX, y[i] * scaleFactor + translateFactorY, mainBoard.ledsRadius  * 2, mainBoard.ledsRadius * 2, mainBoard.ledsRadius, mainBoard.ledsRadius);
 		}
 		html += sprintf("</div>");
 		
 		/*html += sprintf("<div id='timeline-container'><ul id='timeline'>");
-		for(var j = 0; j <= MAX_SCENES; j++) {
-			html += sprintf("<li class='sceneSlot' data-slotNum='%s'>", i);
+		for(var j = 0; j <= MAX_FRAMES; j++) {
+			html += sprintf("<li class='frameSlot' data-slotNum='%s'>", i);
 			html += sprintf("<div class='board' data-slotNum='%s' style='width: %dpx; height: %dpx' >", i, timeline.boards.width, timeline.boards.width);
 		for(var i = 2; i <= 15; i++) {
-			html += sprintf("<div class='boardLed .reslist-item' data-color='%s'  data-resid='currentScene' data-ledNum='%s' style='left: %spx; top: %spx; width: %spx; height: %spx' ></div>", colors[i], i, (x[i] * scaleFactor + translateFactorX) / 4, (y[i] * scaleFactor + translateFactorY, timeline.boards.ledsRadius * 2, timeline.boards.ledsRadius * 2) , timeline.boards.ledsRadius, timeline.boards.ledsRadius);
+			html += sprintf("<div class='boardLed .reslist-item' data-color='%s'  data-resid='currentFrame' data-ledNum='%s' style='left: %spx; top: %spx; width: %spx; height: %spx' ></div>", colors[i], i, (x[i] * scaleFactor + translateFactorX) / 4, (y[i] * scaleFactor + translateFactorY, timeline.boards.ledsRadius * 2, timeline.boards.ledsRadius * 2) , timeline.boards.ledsRadius, timeline.boards.ledsRadius);
 		}
 		html += sprintf("</div>");
 		html += sprintf("</li>");
 		}
 		html += sprintf("</ul></div>");*/
+		html += sprintf('<div><p id="loading"></p></div>');
+		html += sprintf('<a href="#" id="addFrame" data-icon="plus">Add New Frame</a>');
+		html += sprintf('<input data-type="range" id="points" value="1" min="1" max="%s">', scenes[currentSceneId].maxRange);
+		//html += sprintf('<input data-type="input" id="points" value="1">');
+		/*html += sprintf('<div id="timeline">');
 		
-		html += sprintf('<input data-type="range" id="points" value="0" min="0" max="%s">', MAX_SCENES);
-		html += sprintf('<input data-type="range" id="delay" value="0" min=".05" max="1.0" step=".05" >');
+		html += sprintf('<ul class="horizontal">');
+		html += sprintf('</ul>');
+		html += sprintf('</div>');*/
+		html += sprintf('<input data-type="range" id="delay" value=".2" min=".1" max="5.0" step=".100" >');
 		html += sprintf("<a class='%sonnect button' >%sonnect</a>", connected ? "Disc" : "C", connected ? "Disc" : "C");
 		html += sprintf("<a class='%s button' >%s</a>", "PLAY", "PLAY");
 		html += sprintf("<a class='%s button' >%s</a>", "EDIT", "EDIT");
+		//html += sprintf("<a class='%s button' >%s</a>", "Send", "Send");
+		html += sprintf("<a class='%s button' >%s</a>", "Save", "Save");
 		/*resTab.forEach(function (res) {
 			if (noAppDiv) {
 				html += sprintf("<li class='reslist-divider' data-role='list-divider'>Application Resources</li>");
@@ -225,15 +319,19 @@ define (function (require) {
 			html += sprintf("</div>");
 			html += "</li>";
 		});*/
+
+			//App.doRead("currentScene");
 		
 		var $ul = $('#resource-list-content ul');
 		$ul.html(html);
-		//$ul.listview('refresh');
 
+		
+		console.log(frames);
+		//updateTimeline(true);
+		//$ul.listview('refresh');
+		//changeFrameId(1);
 		$('#mainBoard').css({"-webkit-transform" : "scale(.7, .7) translate(-60px, -60px)", });
-		updateLedStates();
-		if(connected == true) 
-			sendCurrentScene();
+		
 		
 		$('.reslist-item').click(function (eobj) {
 			App.doEditBegin(eobj.currentTarget.dataset['resid']);
@@ -243,22 +341,26 @@ define (function (require) {
 		$ul.find('input').textinput({mini: true, theme: 'b'});
 		$ul.find('.button').button({mini: true, theme: 'b'});
 		
+		
 		$('.mainBoardLed').click(function (eobj) {
 			updateStates($(this).attr('data-ledNum'));
-			updateCurrentSceneVal($(this).attr('data-ledNum'));
-			console.log(scenes[currentSceneId]);
+			updateCurrentFrameVal($(this).attr('data-ledNum'));
+			console.log(frames[currentFrameId]);
 			if(connected == true && liveStream == true) 
-				App.doEditBegin("currentScene", scenes[currentSceneId]);
+				App.doEditBegin("currentFrame", frames[currentFrameId]);
 		});
 		
+		$("#addFrame").button();
+		$("#addFrame").click(function() {
+			addFrameToCurrentScene();
+		});
 		$("#points").on('slidestop', function() {
-			changeSceneId($(this).val());
-			//sendSequence();
+			changeFrameId($(this).val());
 		});
 		
 		$("#delay").on('slidestop', function() {
 			changeDelay($(this).val());
-			//sendSequence();
+			//sendScene();
 		});
 		
 		$(".Disconnect").click(function(e) {
@@ -275,13 +377,30 @@ define (function (require) {
 			console.log("clicked");
 		});
 		
+		$(".tBoard").click(function(e) {
+			changeFrameId($(this).attr("data-frameNum"));
+		});
+		
 		$(".PLAY").click(function() {
-			setMode("PLAY");
+			if(connected) {
+				App.doTwoWrites("currentScene",scenes[currentSceneId],     "currentMode","PLAY");
+			}
+		});
+		
+		$(".Send").click(function() {
+			sendScene();
+		});
+		
+		$(".Save").click(function() {
+			saveScene();
 		});
 		
 		$(".EDIT").click(function() {
 			setMode("EDIT");
 		});
+		
+		
+		
 		console.log("finished display");
 		
 	}
@@ -289,9 +408,6 @@ define (function (require) {
 	function init(appMod, dList) {
 		App = appMod;
 		DeviceListView = dList;
-		
-		
-		
 		
 	}
 	
@@ -311,8 +427,14 @@ define (function (require) {
 	ResourceListView.init = init;
 	ResourceListView.onIndicator = onIndicator;
 	ResourceListView.setConnected = setConnected;
-	ResourceListView.changeSceneId = changeSceneId;
+	ResourceListView.changeFrameId = changeFrameId;
 	ResourceListView.recieveRes = recieveRes;
-	ResourceListView.sendSequence = sendSequence;
+	ResourceListView.sendScene = sendScene; 
+	ResourceListView.updateTimeline = updateTimeline;
+	ResourceListView.storeValue = storeValue;
+	ResourceListView.frames = frames;
+	ResourceListView.setCurrentFrameId = setCurrentFrameId;
+	ResourceListView.setCurrentSceneId = setCurrentSceneId;
+	ResourceListView.setSending = setSending;
 	return ResourceListView;
 });
